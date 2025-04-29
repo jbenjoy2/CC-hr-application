@@ -21,7 +21,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "knex": "^3.1.0",
-    "pg": "^8.15.6"
+    "pg": "^8.15.6",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",

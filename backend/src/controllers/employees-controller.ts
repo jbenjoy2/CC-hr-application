@@ -19,6 +19,7 @@ import {
 } from "./transforms";
 import { ValidationError } from "../utils/error";
 import db from "../db/db";
+import { normalizeDeductionsBasedOnSalary } from "../utils";
 
 export const createEmployee = async (
   req: Request,
@@ -29,10 +30,14 @@ export const createEmployee = async (
 
   try {
     const newEmployeeFull = await db.transaction(async (trx) => {
+      const normalizedDeductions = normalizeDeductionsBasedOnSalary(
+        salary,
+        deductions
+      );
       const employee = await createNewEmployee({ name, salary }, trx);
       const insertedDeductions = await createOrUpdateEmployeeDeductions(
         employee.id,
-        deductions,
+        normalizedDeductions,
         trx
       );
 
@@ -95,11 +100,18 @@ export const updateEmployee = async (
     if (!employee) {
       throw new ValidationError(`Invalid employee id: ${req.params.id}`);
     }
+
     if (Array.isArray(deductions) && deductions.length > 0) {
-      await createOrUpdateEmployeeDeductions(employee.id, deductions);
+      const normalizedDeductions = normalizeDeductionsBasedOnSalary(
+        employee.salary,
+        deductions
+      );
+
+      await createOrUpdateEmployeeDeductions(employee.id, normalizedDeductions);
     }
 
     const allDeductions = await getAllDeductionsByEmployeeId(employee.id);
+
     const result: EmployeeWithDeductions = {
       ...employee_dbToTs(employee),
       deductions: allDeductions.map(deduction_dbToTs),
@@ -110,7 +122,6 @@ export const updateEmployee = async (
     next(err);
   }
 };
-
 export const deleteEmployee = async (
   req: Request,
   res: Response,
