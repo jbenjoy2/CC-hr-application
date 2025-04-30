@@ -52,14 +52,16 @@ export const createOrUpdateEmployeeDeductions = async (
     .returning("*");
 };
 
-export const updateDeductionAmount = async (
-  deductionId: string,
-  amount: number
-): Promise<DbEmployeeDeduction> => {
-  const [updatedDeduction] = await db("employee_deductions")
-    .where({ id: deductionId })
-    .update({ deduction_amount: amount })
-    .returning("*");
+// uncomment below to add in logic to update individual deductions in line on the front end
 
-  return updatedDeduction;
-};
+// export const updateDeductionAmount = async (
+//   deductionId: string,
+//   amount: number
+// ): Promise<DbEmployeeDeduction> => {
+//   const [updatedDeduction] = await db("employee_deductions")
+//     .where({ id: deductionId })
+//     .update({ deduction_amount: amount })
+//     .returning("*");
+
+//   return updatedDeduction;
+// };

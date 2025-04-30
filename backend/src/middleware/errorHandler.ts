@@ -12,11 +12,11 @@ export function errorHandler(
   }
 
   if (err instanceof ValidationError) {
-    res.status(err.statusCode).json({ error: err.message });
+    res.status(err.statusCode).json({ message: err.message });
   } else if (err instanceof AppError) {
-    res.status(err.statusCode).json({ error: err.message });
+    res.status(err.statusCode).json({ message: err.message });
   } else {
     console.error("Unhandled error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 }

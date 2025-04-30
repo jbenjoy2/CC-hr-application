@@ -17,7 +17,7 @@ import {
   employee_dbToTs,
   employeeWithPay_dbToTs,
 } from "./transforms";
-import { ValidationError } from "../utils/error";
+import { NotFoundError, ValidationError } from "../utils/error";
 import db from "../db/db";
 import { normalizeDeductionsBasedOnSalary } from "../utils";
 
@@ -101,14 +101,30 @@ export const updateEmployee = async (
       throw new ValidationError(`Invalid employee id: ${req.params.id}`);
     }
 
-    if (Array.isArray(deductions) && deductions.length > 0) {
-      const normalizedDeductions = normalizeDeductionsBasedOnSalary(
-        employee.salary,
-        deductions
-      );
+    const existingEmployeeDeductions = await getAllDeductionsByEmployeeId(
+      employee.id
+    );
 
-      await createOrUpdateEmployeeDeductions(employee.id, normalizedDeductions);
+    const mergedMap = new Map(
+      existingEmployeeDeductions.map((d) => [d.deduction_type, d])
+    );
+
+    // Override or insert with request-provided values
+    for (const newDeduction of deductions ?? []) {
+      mergedMap.set(newDeduction.deduction_type, {
+        ...mergedMap.get(newDeduction.deduction_type),
+        ...newDeduction, // new amount/type will override
+      });
     }
+
+    const mergedDeductions = Array.from(mergedMap.values());
+
+    const normalizedDeductions = normalizeDeductionsBasedOnSalary(
+      employee.salary,
+      mergedDeductions
+    );
+
+    await createOrUpdateEmployeeDeductions(employee.id, normalizedDeductions);
 
     const allDeductions = await getAllDeductionsByEmployeeId(employee.id);
 
@@ -130,7 +146,7 @@ export const deleteEmployee = async (
   try {
     const deleted = await deleteEmployeeById(req.params.id);
     if (!deleted) {
-      res.status(404).json({ error: "Employee not found" });
+      throw new NotFoundError(`Employee with id ${req.params.id} not found`);
     }
     res.status(204).send();
   } catch (error) {

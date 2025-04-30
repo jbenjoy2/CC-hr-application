@@ -74,7 +74,19 @@ export const updateEmployeeById = async (
   updates: EmployeeUpdateFields
 ): Promise<DbEmployee | undefined> => {
   if (!updates.name && updates.salary === undefined) {
-    return;
+    console.warn(
+      `No updates provided for employee ${id}. Returning current record.`
+    );
+    return await getEmployeeById(id);
+  }
+
+  const foundEmployee = await db("employees")
+    .select(["id"])
+    .where({ id })
+    .first();
+
+  if (!foundEmployee) {
+    throw new NotFoundError(`Employee with id ${id} not found`);
   }
   const updatedFields: Partial<EmployeeUpdateFields> = {};
   if (updates.name) {

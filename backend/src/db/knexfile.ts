@@ -4,17 +4,19 @@ import { PoolClient } from "pg";
 
 dotenv.config();
 
+const makeConnection = (prefix: string = "DB") => ({
+  host: process.env[`${prefix}_HOST`] || "localhost",
+  database: process.env[`${prefix}_NAME`] || "hr_application",
+  user: process.env[`${prefix}_USER`] || "postgres",
+  password: process.env[`${prefix}_PASS`] || "",
+  port: Number(process.env[`${prefix}_PORT`] || 5432),
+  timezone: "UTC",
+});
+
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",
-    connection: {
-      host: process.env.DB_HOST || "localhost",
-      database: process.env.DB_NAME || "hr_application",
-      user: process.env.DB_USER || "postgres",
-      password: process.env.DB_PASS || "",
-      port: Number(process.env.DB_PORT) || 5432,
-      timezone: "UTC",
-    },
+    connection: makeConnection("DB"),
     migrations: {
       tableName: "knex_migrations",
       directory: `${__dirname}/migrations`,
@@ -24,7 +26,24 @@ const config: { [key: string]: Knex.Config } = {
         conn: PoolClient,
         done: (err?: Error, conn?: PoolClient) => void
       ) => {
-        // Enforce UTC timezone for this session
+        conn.query("SET TIMEZONE = 'UTC';", (err: any) => {
+          done(err, conn);
+        });
+      },
+    },
+  },
+  test: {
+    client: "pg",
+    connection: makeConnection("TEST_DB"),
+    migrations: {
+      tableName: "knex_migrations",
+      directory: `${__dirname}/migrations`,
+    },
+    pool: {
+      afterCreate: (
+        conn: PoolClient,
+        done: (err?: Error, conn?: PoolClient) => void
+      ) => {
         conn.query("SET TIMEZONE = 'UTC';", (err: any) => {
           done(err, conn);
         });
