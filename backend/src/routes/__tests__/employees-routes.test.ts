@@ -23,7 +23,7 @@ afterAll(async () => {
 
 describe("POST /employees", () => {
   it("should create a new employee", async () => {
-    const res = await request(app).post("/employees").send({
+    const res = await request(app).post("/api/employees").send({
       name: "Test User",
       salary: 60000,
       deductions: [],
@@ -37,7 +37,7 @@ describe("POST /employees", () => {
   });
   it("should create a new employee with deductions", async () => {
     const res = await request(app)
-      .post("/employees")
+      .post("/api/employees")
       .send({
         name: "Test User",
         salary: 60000,
@@ -73,7 +73,7 @@ describe("GET /employees", () => {
       ],
     });
 
-    const res = await request(app).get("/employees");
+    const res = await request(app).get("/api/employees");
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
@@ -99,7 +99,7 @@ describe("GET /employees/:id", () => {
       ],
     });
 
-    const res = await request(app).get(`/employees/${employee.id}`);
+    const res = await request(app).get(`/api/employees/${employee.id}`);
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -118,7 +118,7 @@ describe("GET /employees/:id", () => {
   it("should fail if employee not found", async () => {
     const notFoundId = uuid.v4();
 
-    const res = await request(app).get(`/employees/${notFoundId}`);
+    const res = await request(app).get(`/api/employees/${notFoundId}`);
 
     expect(res.status).toBe(404);
     expect(res.body).toMatchObject({
@@ -135,7 +135,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({ name: "New Name" });
 
     expect(res.statusCode).toEqual(200);
@@ -152,7 +152,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({ salary: employee.salary + 1000 });
 
     expect(res.statusCode).toEqual(200);
@@ -169,7 +169,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({ name: "New Name", salary: employee.salary + 1000 });
 
     expect(res.statusCode).toEqual(200);
@@ -189,7 +189,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({
         deductions: [
           {
@@ -223,7 +223,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({
         name: "New Name",
         salary: employee.salary - 1000,
@@ -252,9 +252,11 @@ describe("PATCH /employees/:id", () => {
   it("returns 404 if employee does not exist", async () => {
     const badEmployeeId = uuid.v4();
 
-    const res = await request(app).patch(`/employees/${badEmployeeId}`).send({
-      name: "New Name",
-    });
+    const res = await request(app)
+      .patch(`/api/employees/${badEmployeeId}`)
+      .send({
+        name: "New Name",
+      });
 
     expect(res.statusCode).toEqual(404);
     expect(res.body).toMatchObject({
@@ -271,7 +273,7 @@ describe("PATCH /employees/:id", () => {
     });
 
     const res = await request(app)
-      .patch(`/employees/${employee.id}`)
+      .patch(`/api/employees/${employee.id}`)
       .send({
         deductions: [
           {
@@ -292,7 +294,7 @@ describe("PATCH /employees/:id", () => {
       ],
     });
 
-    const res = await request(app).patch(`/employees/${employee.id}`).send({
+    const res = await request(app).patch(`/api/employees/${employee.id}`).send({
       salary: 0,
     });
 
@@ -317,7 +319,7 @@ describe("DELETE /employees/:id", () => {
   it("can delete an existing employee", async () => {
     const employee = await seedEmployee({ name: "Test User", salary: 5000 });
 
-    const res = await request(app).delete(`/employees/${employee.id}`);
+    const res = await request(app).delete(`/api/employees/${employee.id}`);
 
     expect(res.statusCode).toEqual(204);
 
@@ -333,7 +335,7 @@ describe("DELETE /employees/:id", () => {
       ],
     });
 
-    const res = await request(app).delete(`/employees/${employee.id}`);
+    const res = await request(app).delete(`/api/employees/${employee.id}`);
 
     expect(res.statusCode).toEqual(204);
 
@@ -348,7 +350,7 @@ describe("DELETE /employees/:id", () => {
   it("throws error if employee id not found", async () => {
     const notFoundId = uuid.v4();
 
-    const res = await request(app).delete(`/employees/${notFoundId}`);
+    const res = await request(app).delete(`/api/employees/${notFoundId}`);
 
     expect(res.statusCode).toEqual(404);
 
