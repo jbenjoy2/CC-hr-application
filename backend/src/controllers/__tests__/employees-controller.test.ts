@@ -40,7 +40,7 @@ describe("Employee controller", () => {
       await employeeController.createEmployee(req, res, next);
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.newEmployee).toMatchObject({
+      expect(res.body).toMatchObject({
         name: "HelperUser",
         salary: 62000,
         id: expect.any(String),
@@ -52,7 +52,7 @@ describe("Employee controller", () => {
         body: {
           name: "HelperUser",
           salary: 62000,
-          deductions: [{ deduction_type: "BENEFITS", deduction_amount: 8 }],
+          deductions: [{ deductionType: "BENEFITS", deductionAmount: 8 }],
         },
       });
 
@@ -62,7 +62,7 @@ describe("Employee controller", () => {
       await employeeController.createEmployee(req, res, next);
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.newEmployee).toMatchObject({
+      expect(res.body).toMatchObject({
         name: "HelperUser",
         salary: 62000,
         id: expect.any(String),
@@ -255,8 +255,8 @@ describe("Employee controller", () => {
         body: {
           deductions: [
             {
-              deduction_type: DeductionTypes.TAX,
-              deduction_amount: deduction.deduction_amount - 50,
+              deductionType: DeductionTypes.TAX,
+              deductionAmount: deduction.deduction_amount - 50,
             },
           ],
         },
@@ -303,8 +303,8 @@ describe("Employee controller", () => {
         body: {
           deductions: [
             {
-              deduction_type: DeductionTypes.TAX,
-              deduction_amount: employee.salary + 10, // make deduction larger than salary
+              deductionType: DeductionTypes.TAX,
+              deductionAmount: employee.salary + 10, // make deduction larger than salary
             },
           ],
         },

@@ -30,7 +30,7 @@ describe("POST /employees", () => {
     });
 
     expect(res.status).toBe(201);
-    expect(res.body.newEmployee).toMatchObject({
+    expect(res.body).toMatchObject({
       name: "Test User",
       salary: 60000,
     });
@@ -43,14 +43,14 @@ describe("POST /employees", () => {
         salary: 60000,
         deductions: [
           {
-            deduction_type: DeductionTypes.TAX,
-            deduction_amount: 100,
+            deductionType: DeductionTypes.TAX,
+            deductionAmount: 100,
           },
         ],
       });
 
     expect(res.status).toBe(201);
-    expect(res.body.newEmployee).toMatchObject({
+    expect(res.body).toMatchObject({
       name: "Test User",
       salary: 60000,
       deductions: [
@@ -193,8 +193,8 @@ describe("PATCH /employees/:id", () => {
       .send({
         deductions: [
           {
-            deduction_amount: deductions[0].deduction_amount - 100,
-            deduction_type: DeductionTypes.TAX,
+            deductionAmount: deductions[0].deduction_amount - 100,
+            deductionType: DeductionTypes.TAX,
           },
         ],
       });
@@ -229,8 +229,8 @@ describe("PATCH /employees/:id", () => {
         salary: employee.salary - 1000,
         deductions: [
           {
-            deduction_amount: deductions[0].deduction_amount - 100,
-            deduction_type: DeductionTypes.TAX,
+            deductionAmount: deductions[0].deduction_amount - 100,
+            deductionType: DeductionTypes.TAX,
           },
         ],
       });
@@ -277,8 +277,8 @@ describe("PATCH /employees/:id", () => {
       .send({
         deductions: [
           {
-            deduction_amount: deductions[0].deduction_amount - 100,
-            deduction_type: "NOT_A_TYPE",
+            deductionAmount: deductions[0].deduction_amount - 100,
+            deductionType: "NOT_A_TYPE",
           },
         ],
       });

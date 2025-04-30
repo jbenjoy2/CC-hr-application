@@ -48,7 +48,7 @@ export const createEmployee = async (
     });
 
     // ✅ Now we know `newEmployeeFull` is definitely assigned
-    res.status(201).json({ newEmployee: newEmployeeFull });
+    res.status(201).json(newEmployeeFull);
   } catch (error) {
     next(error);
   }
@@ -104,18 +104,18 @@ export const updateEmployee = async (
       throw new ValidationError(`Invalid employee id: ${req.params.id}`);
     }
 
-    const existingEmployeeDeductions = await getAllDeductionsByEmployeeId(
-      employee.id
-    );
+    const existingEmployeeDeductions = (
+      await getAllDeductionsByEmployeeId(employee.id)
+    ).map(deduction_dbToTs);
 
     const mergedMap = new Map(
-      existingEmployeeDeductions.map((d) => [d.deduction_type, d])
+      existingEmployeeDeductions.map((d) => [d.deductionType, d])
     );
 
     // Override or insert with request-provided values
     for (const newDeduction of deductions ?? []) {
-      mergedMap.set(newDeduction.deduction_type, {
-        ...mergedMap.get(newDeduction.deduction_type),
+      mergedMap.set(newDeduction.deductionType, {
+        ...mergedMap.get(newDeduction.deductionType),
         ...newDeduction, // new amount/type will override
       });
     }

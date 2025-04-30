@@ -83,7 +83,7 @@ describe("EmployeeDeduction Repository", () => {
     const createdDeductionSingular =
       await employeeDeductionRepo.createOrUpdateEmployeeDeductions(
         createdEmployee1.id,
-        [{ deduction_amount: 100, deduction_type: DeductionTypes.TAX }]
+        [{ deductionAmount: 100, deductionType: DeductionTypes.TAX }]
       );
 
     expect(createdDeductionSingular).toHaveLength(1);
@@ -97,8 +97,8 @@ describe("EmployeeDeduction Repository", () => {
       await employeeDeductionRepo.createOrUpdateEmployeeDeductions(
         createdEmployee2.id,
         [
-          { deduction_amount: 200, deduction_type: DeductionTypes.TAX },
-          { deduction_amount: 20, deduction_type: DeductionTypes.OTHER },
+          { deductionAmount: 200, deductionType: DeductionTypes.TAX },
+          { deductionAmount: 20, deductionType: DeductionTypes.OTHER },
         ]
       );
 
@@ -125,13 +125,13 @@ describe("EmployeeDeduction Repository", () => {
 
     await employeeDeductionRepo.createOrUpdateEmployeeDeductions(
       createdEmployee.id,
-      [{ deduction_amount: 100, deduction_type: DeductionTypes.TAX }]
+      [{ deductionAmount: 100, deductionType: DeductionTypes.TAX }]
     );
 
     const updatedDeduction =
       await employeeDeductionRepo.createOrUpdateEmployeeDeductions(
         createdEmployee.id,
-        [{ deduction_amount: 150, deduction_type: DeductionTypes.TAX }]
+        [{ deductionAmount: 150, deductionType: DeductionTypes.TAX }]
       );
 
     // check db for employee deductions

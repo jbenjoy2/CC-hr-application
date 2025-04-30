@@ -1,4 +1,4 @@
-import { DeductionTypes } from "../types";
+import { Deduction, DeductionTypes } from "../types";
 import db from "../db/db";
 import { ValidationError } from "../utils/error";
 import { Knex } from "knex";
@@ -22,10 +22,7 @@ export const getAllDeductionsByEmployeeId = async (
 
 export const createOrUpdateEmployeeDeductions = async (
   employeeId: string,
-  deductions: Pick<
-    DbEmployeeDeduction,
-    "deduction_amount" | "deduction_type"
-  >[],
+  deductions: Pick<Deduction, "deductionAmount" | "deductionType">[],
   trx?: Knex.Transaction
 ): Promise<readonly DbEmployeeDeduction[]> => {
   const dbInstance = trx ?? db;
@@ -41,8 +38,8 @@ export const createOrUpdateEmployeeDeductions = async (
 
   const rows = deductions.map((d) => ({
     employee_id: employeeId,
-    deduction_type: d.deduction_type,
-    deduction_amount: d.deduction_amount,
+    deduction_type: d.deductionType,
+    deduction_amount: d.deductionAmount,
   }));
 
   return await dbInstance("employee_deductions")

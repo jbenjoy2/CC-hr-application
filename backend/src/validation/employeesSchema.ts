@@ -5,8 +5,8 @@ export const DeductionTypes = ["TAX", "BENEFITS", "UNION", "OTHER"] as const;
 
 // A single deduction
 const deductionSchema = z.object({
-  deduction_type: z.enum(DeductionTypes),
-  deduction_amount: z.number().min(0, "Deduction amount must be >= 0"),
+  deductionType: z.enum(DeductionTypes),
+  deductionAmount: z.number().min(0, "Deduction amount must be >= 0"),
 });
 
 // CREATE Employee
