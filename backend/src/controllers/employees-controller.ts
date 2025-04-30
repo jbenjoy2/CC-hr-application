@@ -59,10 +59,13 @@ export const getAll = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log("hit this route");
   try {
     const employees = await getAllEmployeesWithNetPay();
+    console.log({ employees });
     res.json(employees.map(employeeWithPay_dbToTs));
   } catch (error) {
+    console.log("in ehre");
     next(error);
   }
 };
