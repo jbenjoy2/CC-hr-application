@@ -3,15 +3,19 @@ import { EmployeeListCard } from "./employees-list-card";
 
 interface Props {
   readonly employees: readonly EmployeeWithNetPay[];
+  readonly actions: {
+    onClickDelete: (emp: EmployeeWithNetPay) => void;
+  };
 }
 export const EmployeesCardList: React.FC<Props> = (p) => {
-  const handleDelete = (id: string) => {
-    console.log(`Deleted: ${id}`);
-  };
   return (
     <div className="d-flex flex-column gap-3">
       {p.employees.map((emp) => (
-        <EmployeeListCard key={emp.id} employee={emp} onDelete={handleDelete} />
+        <EmployeeListCard
+          key={emp.id}
+          employee={emp}
+          onDelete={() => p.actions.onClickDelete(emp)}
+        />
       ))}
     </div>
   );

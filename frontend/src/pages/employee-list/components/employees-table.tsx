@@ -9,14 +9,18 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   readonly employees: EmployeeWithNetPay[];
+  readonly actions: {
+    onClickDelete: (emp: EmployeeWithNetPay) => void;
+  };
 }
 
 const EmployeesTable: React.FC<Props> = (p) => {
   const [sorting, setSorting] = useState<SortingState>([]);
-
+  const navigate = useNavigate();
   const columns: ColumnDef<EmployeeWithNetPay>[] = [
     {
       accessorKey: "name",
@@ -38,24 +42,18 @@ const EmployeesTable: React.FC<Props> = (p) => {
       cell: (info) => `$${info.getValue()}`,
     },
     {
-      id: "actions",
-      header: "Actions",
+      id: "delete",
+      header: "Delete",
       cell: ({ row }) => {
         const emp = row.original;
         return (
           <div className="d-flex gap-4 justify-content-center">
             <button
-              className="btn p-0 border-0 bg-transparent text-primary"
-              onClick={() => console.log("Edit", emp.id)}
-              title="Edit"
-            >
-              <span className="material-icons" style={{ fontSize: "20px" }}>
-                edit
-              </span>
-            </button>
-            <button
-              className="btn p-0 border-0 bg-transparent text-danger"
-              onClick={() => console.log("Delete", emp.id)}
+              className="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                p.actions.onClickDelete(emp);
+              }}
               title="Delete"
             >
               <span className="material-icons" style={{ fontSize: "20px" }}>
@@ -115,7 +113,11 @@ const EmployeesTable: React.FC<Props> = (p) => {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.original.id}
+              onClick={() => navigate(`/employees/${row.original.id}`)}
+              style={{ cursor: "pointer" }}
+            >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

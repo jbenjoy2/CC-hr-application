@@ -8,20 +8,18 @@ interface Props {
 export const EmployeeListCard: React.FC<Props> = (p) => {
   const navigate = useNavigate();
   return (
-    <div className="card shadow-sm p-3">
+    <div
+      className="card shadow-sm p-3"
+      onClick={() => navigate(`/employees/${p.employee.id}`)}
+      style={{ cursor: "pointer" }}
+    >
       <div className="position-absolute top-0 end-0 p-2 d-flex gap-2">
         <button
-          className="btn p-0 border-0 bg-transparent text-primary"
-          onClick={() => navigate(`/employees/${p.employee.id}/edit`)}
-          title="Edit"
-        >
-          <span className="material-icons" style={{ fontSize: "20px" }}>
-            edit
-          </span>
-        </button>
-        <button
-          className="btn p-0 border-0 bg-transparent text-danger"
-          onClick={() => p.onDelete(p.employee.id)}
+          className="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            p.onDelete(p.employee.id);
+          }}
           title="Delete"
         >
           <span className="material-icons" style={{ fontSize: "20px" }}>
