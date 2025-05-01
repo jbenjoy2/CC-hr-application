@@ -10,7 +10,7 @@ dotenv.config({
   path: `${__dirname}/../../../.env.${process.env.NODE_ENV || "test"}`,
 });
 
-const db = knex(config.test);
+const db = knex(config);
 
 // Auto rollback and migrate fresh schema
 export async function setupTestDb() {
