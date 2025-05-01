@@ -9,6 +9,7 @@ import { EmployeeWithNetPay } from "../../types";
 import { useDeleteEmployee } from "../../hooks/useDeleteEmployee";
 import DeleteEmployeeModal from "./components/delete-employee-modal";
 import { useNavigate } from "react-router-dom";
+import CenteredSpinner from "../../components/custom-spinner";
 
 const EmployeeListPage = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const EmployeeListPage = () => {
   );
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <CenteredSpinner />;
   }
 
   return (

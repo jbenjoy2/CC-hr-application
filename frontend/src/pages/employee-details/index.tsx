@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEmployeeDetails } from "../../hooks/useEmployeeDetails";
 import EmployeeForm from "./components/employee-form";
 import { DetailsView } from "./components/details-view";
+import CenteredSpinner from "../../components/custom-spinner";
 
 export const EmployeeDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,7 +12,7 @@ export const EmployeeDetailsPage: React.FC = () => {
   const navigate = useNavigate();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <CenteredSpinner />;
   }
   if (!employee) {
     return <div>Error: No employee found</div>;
