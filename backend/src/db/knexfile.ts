@@ -50,6 +50,24 @@ const config: { [key: string]: Knex.Config } = {
       },
     },
   },
+  production: {
+    client: "pg",
+    connection: process.env.DATABASE_URL,
+    migrations: {
+      tableName: "knex_migrations",
+      directory: `${__dirname}/migrations`,
+    },
+    pool: {
+      afterCreate: (
+        conn: PoolClient,
+        done: (err?: Error, conn?: PoolClient) => void
+      ) => {
+        conn.query("SET TIMEZONE = 'UTC';", (err: any) => {
+          done(err, conn);
+        });
+      },
+    },
+  },
 };
 
 // Initialize Knex instance
