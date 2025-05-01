@@ -249,12 +249,12 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                 }}
               </FieldArray>
 
+              {error && error.response?.data && (
+                <div className="alert alert-danger mb-2">
+                  {error.response?.data?.message}
+                </div>
+              )}
               <div className="mt-4 d-flex flex-column flex-md-row gap-2">
-                {error && error.response?.data && (
-                  <div className="alert alert-danger">
-                    {error.response?.data?.message}
-                  </div>
-                )}
                 <button
                   type="submit"
                   className="btn btn-primary order-0 order-md-1"
