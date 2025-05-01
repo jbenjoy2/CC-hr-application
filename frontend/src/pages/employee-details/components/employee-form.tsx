@@ -65,7 +65,7 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
     salary: raw.salary ?? 0,
     deductions: raw.deductions ?? [],
   });
-  const { saveEmployee, error, clearError } = useSaveEmployee();
+  const { saveEmployee, error, clearError, loading } = useSaveEmployee();
 
   const navigate = useNavigate();
 
@@ -249,17 +249,25 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                 }}
               </FieldArray>
 
-              {error && error.response?.data && (
-                <div className="alert alert-danger mb-2">
-                  {error.response?.data?.message}
-                </div>
-              )}
               <div className="mt-4 d-flex flex-column flex-md-row gap-2">
                 <button
                   type="submit"
                   className="btn btn-primary order-0 order-md-1"
+                  style={{ minWidth: "150px " }}
                 >
-                  {mode === "edit" ? "Update Employee" : "Create Employee"}
+                  {loading ? (
+                    <div
+                      className="spinner-border border-3 text-white"
+                      role="status"
+                      style={{ height: "1.25rem", width: "1.25rem" }}
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  ) : mode === "edit" ? (
+                    "Update Employee"
+                  ) : (
+                    "Create Employee"
+                  )}
                 </button>
                 <button
                   type="button"
@@ -279,6 +287,11 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                   Cancel
                 </button>
               </div>
+              {error && error.response?.data && (
+                <div className="alert alert-danger mt-4">
+                  {error.response?.data?.message}
+                </div>
+              )}
             </Form>
           );
         }}
