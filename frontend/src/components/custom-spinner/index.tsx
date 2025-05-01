@@ -1,5 +1,3 @@
-import React from "react";
-
 const CenteredSpinner = () => {
   return (
     <div className="d-flex align-items-center justify-content-center vh-100">
