@@ -2,7 +2,8 @@ import knex, { Knex } from "knex";
 import { execSync } from "child_process";
 import dotenv from "dotenv";
 import { parse } from "pg-connection-string";
-import config from "./knexfile";
+
+import { getKnexConfig } from "./knexConfig";
 
 // ✅ Load .env only in local development
 console.log({ env: process.env.NODE_ENV });
@@ -121,7 +122,7 @@ async function ensureDatabaseAndMigrate(targetDbName: string) {
   console.log(`🔄 Running migrations on '${targetDbName}'...`);
   try {
     await dbConnection.migrate.latest({
-      directory: config.development.migrations?.directory,
+      directory: getKnexConfig("development").migrations?.directory,
     });
     console.log(`✅ Migrations complete on '${targetDbName}'.`);
   } catch (err) {

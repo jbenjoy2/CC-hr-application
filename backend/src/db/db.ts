@@ -1,8 +1,12 @@
 import knex from "knex";
-import config from "./knexfile";
+import { getKnexConfig } from "./knexConfig";
 
 const environment = process.env.NODE_ENV || "development";
-const db = knex(config[environment]);
-console.log("Connecting to DB:", config[environment].connection);
+console.log({ environment });
+
+const config = getKnexConfig(environment);
+console.log("Connecting to DB:", config.connection);
+
+const db = knex(config);
 
 export default db;
