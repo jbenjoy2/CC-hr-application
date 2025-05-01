@@ -3,7 +3,29 @@ import dotenv from "dotenv";
 import { PoolClient } from "pg";
 
 dotenv.config();
+import { parse } from "pg-connection-string";
+function getProductionConnection(): Knex.PgConnectionConfig {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("❌ DATABASE_URL is not defined in environment variables.");
+  }
 
+  const parsed = parse(process.env.DATABASE_URL);
+
+  const { host, user, password, database, port } = parsed;
+
+  if (!host || !user || !database) {
+    throw new Error("❌ DATABASE_URL is missing host, user, or database.");
+  }
+
+  return {
+    host,
+    user,
+    password,
+    database,
+    port: port ? parseInt(port) : 5432,
+    ssl: { rejectUnauthorized: false },
+  };
+}
 const makeConnection = (prefix: string = "DB") => ({
   host: process.env[`${prefix}_HOST`] || "localhost",
   database: process.env[`${prefix}_NAME`] || "hr_application",
@@ -52,7 +74,7 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     client: "pg",
-    connection: process.env.DATABASE_URL,
+    connection: getProductionConnection(),
     migrations: {
       tableName: "knex_migrations",
       directory: `${__dirname}/migrations`,
