@@ -1,1 +1,31 @@
+@media (min-width: 768px) {
+  .border-xl-none {
+    border: none !important;
+  }
+}
 
+@media (min-width: 1200px) {
+  .w-xl-25 {
+    width: 25% !important;
+  }
+  .w-xl-50 {
+    width: 50% !important;
+  }
+  .w-xl-75 {
+    width: 75% !important;
+  }
+}
+
+.container-xl-fluid {
+  width: 100%;
+  padding-right: var(--bs-gutter-x, 0.75rem);
+  padding-left: var(--bs-gutter-x, 0.75rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (max-width: 1199.98px) {
+  .container-xl-fluid {
+    max-width: 1140px; /* same as Bootstrap's .container-lg max width */
+  }
+}

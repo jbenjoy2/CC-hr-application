@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./styles.css";
 import { useEmployees } from "../../hooks/useEmployees";
 import EmployeesTable from "./components/employees-table";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -65,7 +64,7 @@ const EmployeeListPage = () => {
       <Helmet>
         <title>CC Manage - Home</title>
       </Helmet>
-      <div className={`container-fluid my-3 px-1 px-xl-4 w-75`}>
+      <div className={`container-xl my-3 px-1 px-xl-4 w-100 w-75`}>
         <div className="d-none d-md-flex align-items-center mb-3">
           {/* Left spacer */}
           <div className="flex-grow-1"></div>

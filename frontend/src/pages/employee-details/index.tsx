@@ -33,7 +33,7 @@ export const EmployeeDetailsPage: React.FC = () => {
           {isEditing ? " - Edit" : ""}
         </title>
       </Helmet>
-      <div className={` container-xl-fluid my-3 px-1 px-xl-4 w-100 w-xl-75`}>
+      <div className={`container-xl my-3 px-1 px-xl-4 w-100 w-75`}>
         {isEditing ? (
           <div>
             <h2 className="text-primary mb-3 text-center">Edit Employee</h2>
