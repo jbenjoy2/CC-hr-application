@@ -3,3 +3,9 @@
     border: none !important;
   }
 }
+
+@media (min-width: 1200px) {
+  .w-xl-25 {
+    width: 25% !important;
+  }
+}

@@ -112,51 +112,71 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                 {({ remove, push }) => (
                   <div>
                     <h5>Deductions</h5>
-                    {values.deductions.map((deduction, index) => (
-                      <div
-                        key={deduction.id ?? index}
-                        className="d-flex align-items-center mb-2 gap-2
-                      justify-content-between
-                      justify-content-md-start border border-info
-                      rounded border-xl-none p-2 p-xl-0 w-75"
-                      >
-                        <div className="d-flex flex-column gap-2 flex-xl-row">
-                          <div>
-                            <Field
-                              name={`deductions.${index}.deductionType`}
-                              className="form-control form-control-sm w-auto"
-                              disabled // existing type cannot be changed
-                            />
+                    <div className="d-flex flex-column flex-md-row align-items-md-start gap-2">
+                      {values.deductions.map((deduction, index) => (
+                        <div
+                          key={deduction.id ?? index}
+                          className="d-inline-flex align-items-center mb-2 gap-2 border border-info rounded p-3"
+                        >
+                          <div className="d-flex flex-column gap-2 flex-xl-row">
+                            <div>
+                              <Field
+                                name={`deductions.${index}.deductionType`}
+                                className="form-control form-control-sm w-auto"
+                                disabled // existing type cannot be changed
+                              />
+                            </div>
+                            <div>
+                              <Field
+                                name={`deductions.${index}.deductionAmount`}
+                                type="number"
+                                className="form-control form-control-sm w-auto"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Field
-                              name={`deductions.${index}.deductionAmount`}
-                              type="number"
-                              className="form-control form-control-sm w-auto"
-                            />
-                          </div>
-                        </div>
-                        <div className="align-self-end">
-                          <button
-                            type="button"
-                            className="btn btn-outline-danger"
-                            onClick={async () => {
-                              remove(index);
-                              if (deduction.id) {
-                                await deleteEmployeeDeduction(deduction.id);
-                              }
-                            }}
-                          >
-                            <span
-                              className="material-icons"
-                              style={{ fontSize: "20px" }}
+                          <div className="d-none d-md-block align-self-end">
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger"
+                              onClick={async () => {
+                                remove(index);
+                                if (deduction.id) {
+                                  await deleteEmployeeDeduction(deduction.id);
+                                }
+                              }}
                             >
-                              delete
-                            </span>
-                          </button>
+                              <span
+                                className="material-icons"
+                                style={{ fontSize: "20px" }}
+                              >
+                                delete
+                              </span>
+                            </button>
+                          </div>
+
+                          <div className="d-md-none position-absolute top-0 end-0 bottom-0 d-flex align-items-center pe-2">
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger h-50"
+                              style={{ aspectRatio: "1 / 1" }}
+                              onClick={async () => {
+                                remove(index);
+                                if (deduction.id) {
+                                  await deleteEmployeeDeduction(deduction.id);
+                                }
+                              }}
+                            >
+                              <span
+                                className="material-icons"
+                                style={{ fontSize: "20px" }}
+                              >
+                                delete
+                              </span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
 
                     {availableTypes.length > 0 && (
                       <div className="mt-3">
@@ -208,12 +228,15 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                     {error.response?.data?.message}
                   </div>
                 )}
-                <button type="submit" className="btn btn-primary ">
+                <button
+                  type="submit"
+                  className="btn btn-primary order-0 order-md-1"
+                >
                   {mode === "edit" ? "Update Employee" : "Create Employee"}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline-danger"
+                  className="btn btn-outline-danger order-1 order-md-0"
                   onClick={() => {
                     if (dirty) {
                       setShowModal(true);
