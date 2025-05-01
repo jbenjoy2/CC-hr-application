@@ -12,7 +12,6 @@ const apiRouter = express.Router();
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
-    credentials: true, // if needed for cookies
   })
 );
 app.use(express.json());
