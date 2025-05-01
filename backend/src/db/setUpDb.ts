@@ -2,7 +2,7 @@ import knex from "knex";
 import config from "./knexfile";
 import { execSync } from "child_process";
 import dotenv from "dotenv";
-import fs from "fs";
+import { parse } from "pg-connection-string";
 const result = dotenv.config({ path: `${__dirname}/../../.env` });
 function requireEnv(varName: string): string {
   const value = process.env[varName];
@@ -14,8 +14,21 @@ function requireEnv(varName: string): string {
   return value;
 }
 
-const dbName = requireEnv("DB_NAME");
-const dbUser = requireEnv("DB_USER");
+const connectionString = process.env.DATABASE_URL;
+let dbName: string;
+let dbUser: string;
+
+if (connectionString) {
+  const parsed = parse(connectionString);
+  if (!parsed.database || !parsed.user) {
+    throw new Error("❌ DATABASE_URL missing database or user.");
+  }
+  dbName = parsed.database;
+  dbUser = parsed.user;
+} else {
+  dbName = requireEnv("DB_NAME");
+  dbUser = requireEnv("DB_USER");
+}
 const testDbName = process.env.TEST_DB_NAME; // optional
 if (result.error) {
   console.error("❌ Failed to load .env file:", result.error);
@@ -31,15 +44,17 @@ if (!dbUser) {
   throw new Error("❌ DB_USER is not defined in environment variables.");
 }
 
+const baseConnection = connectionString || {
+  host: process.env.DB_HOST,
+  database: "postgres",
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  port: Number(process.env.DB_PORT) || 5432,
+};
+
 const db = knex({
   client: "pg",
-  connection: {
-    host: process.env.DB_HOST,
-    database: "postgres", // Connect to the default database first
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    port: Number(process.env.DB_PORT) || 5432,
-  },
+  connection: baseConnection,
 });
 
 async function ensureDatabaseAndMigrate(targetDbName: string) {
@@ -70,7 +85,7 @@ async function ensureDatabaseAndMigrate(targetDbName: string) {
   // Connect to the specific database
   const dbConnection = knex({
     client: "pg",
-    connection: {
+    connection: connectionString || {
       host: process.env.DB_HOST,
       database: targetDbName,
       user: dbUser,
