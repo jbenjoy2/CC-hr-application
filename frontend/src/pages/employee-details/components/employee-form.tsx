@@ -1,12 +1,18 @@
 import React from "react";
 import { Formik, Form, Field, FieldArray, FieldProps } from "formik";
 import * as Yup from "yup";
-import { DeductionTypes, EmployeeWithDeductions } from "../../../types";
+import {
+  Deduction,
+  DeductionTypes,
+  EmployeeWithDeductions,
+} from "../../../types";
 import { useSaveEmployee } from "../../../hooks/useSaveEmployee";
 import { useDeleteEmployeeDeduction } from "../../../hooks/useDeleteEmployeeDeduction";
 import "./styles.css";
 import { useNavigate } from "react-router-dom";
 import CancellationModal from "./cancellation-modal";
+import DeleteDeductionModal from "./delete-deduction-modal";
+
 export interface DeductionInput {
   deductionType: DeductionTypes;
   deductionAmount: number;
@@ -42,7 +48,15 @@ const validationSchema = Yup.object({
 const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
   const allTypes = Object.values(DeductionTypes);
   const [selectedNewType, setSelectedNewType] = React.useState<string>("");
-  const [showModal, setShowModal] = React.useState(false);
+  const [showCancelModal, setShowCancelModal] = React.useState(false);
+  const [showDeductionDeleteModal, setShowDeductionDeleteModal] =
+    React.useState(false);
+  const [selectedDeduction, setSelectedDeduction] =
+    React.useState<Deduction | null>(null);
+  const [pendingDeductionDeleteIndex, setPendingDeductionDeleteIndex] =
+    React.useState<number | null>(null);
+
+  const removeRef = React.useRef<((index: number) => void) | null>(null);
 
   const getSafeInitialValues = (
     raw: Partial<EmployeeWithDeductions> = {}
@@ -109,117 +123,125 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
               </div>
 
               <FieldArray name="deductions">
-                {({ remove, push }) => (
-                  <div>
-                    <h5>Deductions</h5>
-                    <div className="d-flex flex-column flex-md-row align-items-md-start gap-2">
-                      {values.deductions.map((deduction, index) => (
-                        <div
-                          key={deduction.id ?? index}
-                          className="d-inline-flex align-items-center mb-2 gap-2 border border-info rounded p-3"
-                        >
-                          <div className="d-flex flex-column gap-2 flex-xl-row">
-                            <div>
-                              <Field
-                                name={`deductions.${index}.deductionType`}
-                                className="form-control form-control-sm w-auto"
-                                disabled // existing type cannot be changed
-                              />
+                {({ remove, push }) => {
+                  removeRef.current = remove;
+                  return (
+                    <div>
+                      <h5>Deductions</h5>
+                      <div className="d-flex flex-column flex-md-row align-items-md-start gap-2">
+                        {values.deductions.map((deduction, index) => (
+                          <div
+                            key={deduction.id ?? index}
+                            className="d-inline-flex align-items-center mb-2 gap-2 border border-info rounded p-3"
+                          >
+                            <div className="d-flex flex-column gap-2 flex-xl-row">
+                              <div>
+                                <Field
+                                  name={`deductions.${index}.deductionType`}
+                                  className="form-control form-control-sm w-auto"
+                                  disabled // existing type cannot be changed
+                                />
+                              </div>
+                              <div>
+                                <Field
+                                  name={`deductions.${index}.deductionAmount`}
+                                  type="number"
+                                  className="form-control form-control-sm w-auto"
+                                />
+                              </div>
                             </div>
-                            <div>
-                              <Field
-                                name={`deductions.${index}.deductionAmount`}
-                                type="number"
-                                className="form-control form-control-sm w-auto"
-                              />
+                            <div className="d-none d-md-block align-self-end">
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger"
+                                onClick={async () => {
+                                  if (deduction.id) {
+                                    setSelectedDeduction(
+                                      deduction as Deduction
+                                    );
+                                    setPendingDeductionDeleteIndex(index);
+                                    setShowDeductionDeleteModal(true);
+                                  } else {
+                                    remove(index);
+                                  }
+                                }}
+                              >
+                                <span
+                                  className="material-icons"
+                                  style={{ fontSize: "20px" }}
+                                >
+                                  delete
+                                </span>
+                              </button>
+                            </div>
+
+                            <div className="d-md-none position-absolute top-0 end-0 bottom-0 d-flex align-items-center pe-2">
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger h-50"
+                                style={{ aspectRatio: "1 / 1" }}
+                                onClick={async () => {
+                                  remove(index);
+                                  if (deduction.id) {
+                                    await deleteEmployeeDeduction(deduction.id);
+                                  }
+                                }}
+                              >
+                                <span
+                                  className="material-icons"
+                                  style={{ fontSize: "20px" }}
+                                >
+                                  delete
+                                </span>
+                              </button>
                             </div>
                           </div>
-                          <div className="d-none d-md-block align-self-end">
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger"
-                              onClick={async () => {
-                                remove(index);
-                                if (deduction.id) {
-                                  await deleteEmployeeDeduction(deduction.id);
-                                }
-                              }}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ fontSize: "20px" }}
-                              >
-                                delete
-                              </span>
-                            </button>
-                          </div>
-
-                          <div className="d-md-none position-absolute top-0 end-0 bottom-0 d-flex align-items-center pe-2">
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger h-50"
-                              style={{ aspectRatio: "1 / 1" }}
-                              onClick={async () => {
-                                remove(index);
-                                if (deduction.id) {
-                                  await deleteEmployeeDeduction(deduction.id);
-                                }
-                              }}
-                            >
-                              <span
-                                className="material-icons"
-                                style={{ fontSize: "20px" }}
-                              >
-                                delete
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {availableTypes.length > 0 && (
-                      <div className="mt-3">
-                        <label className="form-label">Add Deduction</label>
-                        <div className="row g-2 align-items-end">
-                          <div className="col-6 col-md-4">
-                            <select
-                              className="form-select"
-                              value={selectedNewType}
-                              onChange={(e) =>
-                                setSelectedNewType(e.target.value)
-                              }
-                            >
-                              <option value="">Choose type...</option>
-                              {availableTypes.map((type) => (
-                                <option key={type} value={type}>
-                                  {type.replace("_", " ")}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="col-auto">
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary btn-sm"
-                              disabled={!selectedNewType}
-                              onClick={() => {
-                                push({
-                                  deductionType:
-                                    selectedNewType as DeductionTypes,
-                                  deductionAmount: 0,
-                                });
-                                setSelectedNewType("");
-                              }}
-                            >
-                              Add Deduction
-                            </button>
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                )}
+
+                      {availableTypes.length > 0 && (
+                        <div className="mt-3">
+                          <label className="form-label">Add Deduction</label>
+                          <div className="row g-2 align-items-end">
+                            <div className="col-6 col-md-4">
+                              <select
+                                className="form-select"
+                                value={selectedNewType}
+                                onChange={(e) =>
+                                  setSelectedNewType(e.target.value)
+                                }
+                              >
+                                <option value="">Choose type...</option>
+                                {availableTypes.map((type) => (
+                                  <option key={type} value={type}>
+                                    {type.replace("_", " ")}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="col-auto">
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                disabled={!selectedNewType}
+                                onClick={() => {
+                                  push({
+                                    deductionType:
+                                      selectedNewType as DeductionTypes,
+                                    deductionAmount: 0,
+                                  });
+                                  setSelectedNewType("");
+                                }}
+                              >
+                                Add Deduction
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
               </FieldArray>
 
               <div className="mt-4 d-flex flex-column flex-md-row gap-2">
@@ -239,7 +261,7 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                   className="btn btn-outline-danger order-1 order-md-0"
                   onClick={() => {
                     if (dirty) {
-                      setShowModal(true);
+                      setShowCancelModal(true);
                     } else {
                       if (initialValues.id) {
                         onSuccess?.();
@@ -257,9 +279,23 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
         }}
       </Formik>
       <CancellationModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
         onConfirm={() => (initialValues.id ? onSuccess?.() : navigate("/"))}
+      />
+      <DeleteDeductionModal
+        isOpen={showDeductionDeleteModal}
+        onClose={() => setShowDeductionDeleteModal(false)}
+        onConfirm={() => {
+          if (selectedDeduction?.id && pendingDeductionDeleteIndex !== null) {
+            deleteEmployeeDeduction(selectedDeduction.id);
+            removeRef.current?.(pendingDeductionDeleteIndex);
+          }
+          setSelectedDeduction(null);
+          setPendingDeductionDeleteIndex(null);
+          setShowDeductionDeleteModal(false);
+        }}
+        deduction={selectedDeduction}
       />
     </div>
   );
