@@ -2,10 +2,12 @@ import { useCallback, useState } from "react";
 import { createNewEmployee, updateEmployee } from "../services/api";
 import { EmployeeFormValues } from "../pages/employee-details/components/employee-form";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "../types";
 
 export function useSaveEmployee() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<AxiosError<ApiErrorResponse> | null>(null);
   const navigate = useNavigate();
   const saveEmployee = useCallback(
     async (
@@ -28,13 +30,14 @@ export function useSaveEmployee() {
           }
         }
       } catch (err) {
-        setError(err as Error);
+        setError(err as AxiosError<ApiErrorResponse>);
       } finally {
         setLoading(false);
       }
     },
     [navigate]
   );
+  const clearError = () => setError(null);
 
-  return { saveEmployee, loading, error };
+  return { saveEmployee, loading, error, clearError };
 }

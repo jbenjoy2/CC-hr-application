@@ -7,9 +7,15 @@ export function useEmployees() {
   const [loading, setLoading] = useState(true);
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
-    const response = await getAllEmployees();
-    setEmployees(response);
-    setLoading(false);
+    try {
+      const response = await getAllEmployees();
+      setEmployees(response);
+    } catch (err) {
+      console.error("Failed to fetch employees:", err);
+      setEmployees([]); // or show an error state
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

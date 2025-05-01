@@ -1,0 +1,5 @@
+@media (min-width: 768px) {
+  .border-xl-none {
+    border: none !important;
+  }
+}

@@ -42,7 +42,7 @@ export const DetailsView: React.FC<Props> = (p) => {
             <strong>Net Pay:</strong> ${netPay}
           </div>
           <button
-            className="btn btn-outline-secondary mt-2"
+            className="btn btn-outline-primary mt-2"
             onClick={p.onClickEdit}
           >
             Edit Employee Details

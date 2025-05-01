@@ -80,7 +80,7 @@ const EmployeesTable: React.FC<Props> = (p) => {
   });
   return (
     <div className="table-responsive w-100">
-      <table className="table table-bordered table-striped align-middle">
+      <table className="table table-bordered align-middle table-hover">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>

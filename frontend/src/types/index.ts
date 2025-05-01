@@ -25,3 +25,7 @@ export interface EmployeeWithNetPay extends EmployeeBase {
   totalDeductions: number;
   netPay: number;
 }
+export interface ApiErrorResponse {
+  message: string;
+  code?: string;
+}

@@ -23,3 +23,10 @@ export async function updateEmployee(
   const res = await api.patch(`/employees/${id}`, values);
   return res.data;
 }
+
+export async function deleteEmployee(id: string) {
+  await api.delete(`/employees/${id}`);
+}
+export async function deleteEmployeeDeduction(id: string) {
+  await api.delete(`/employee-deductions/${id}`);
+}
