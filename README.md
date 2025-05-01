@@ -163,3 +163,5 @@ The desktop view of the employees list is fully sortable by nature of the `react
 ### Scalability
 
 The simple nature of this app lends itself well to scale up as the company grows. The employee data and deductions data is all relatively simple, and therefore can scale without issue. As more features are added and more users are accessising it, there may be a desire to spin up multiple dyno instances of the server and buffer traffic with a load balancer, just to maintain efficient data flow.
+
+One biproduct of scaling to consider,though, is page-load times for the main page as more and more employees have to be fetched. A caching layer on the front end could be useful to prevent unnecessary API fetching of employees already in the cache.
