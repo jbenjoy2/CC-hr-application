@@ -1,9 +1,23 @@
-import knex from "knex";
-import config from "./knexfile";
+import knex, { Knex } from "knex";
 import { execSync } from "child_process";
 import dotenv from "dotenv";
+import fs from "fs";
 import { parse } from "pg-connection-string";
-const result = dotenv.config({ path: `${__dirname}/../../.env` });
+import path from "path";
+import config from "./knexfile";
+import { PoolClient } from "pg";
+
+// ✅ Load .env only in development and show status
+if (process.env.NODE_ENV !== "production") {
+  const result = dotenv.config();
+  if (result.error) {
+    console.warn("⚠️ Failed to load .env file:", result.error);
+  } else {
+    console.log("✅ .env file loaded successfully.");
+  }
+}
+
+// 🔧 Helper to require specific environment vars (for local fallback)
 function requireEnv(varName: string): string {
   const value = process.env[varName];
   if (!value) {
@@ -14,14 +28,42 @@ function requireEnv(varName: string): string {
   return value;
 }
 
-const connectionString = process.env.DATABASE_URL;
+// 🔧 Build connection config using DATABASE_URL or individual env vars
+function getConnectionConfig(
+  baseDb: string = "postgres"
+): Knex.PgConnectionConfig {
+  if (process.env.DATABASE_URL) {
+    const parsed = parse(process.env.DATABASE_URL);
+    if (!parsed.host || !parsed.user) {
+      throw new Error("❌ Invalid DATABASE_URL: missing host, user");
+    }
+    return {
+      host: parsed.host,
+      user: parsed.user,
+      password: parsed.password,
+      port: parsed.port ? parseInt(parsed.port) : 5432,
+      database: baseDb,
+      ssl: { rejectUnauthorized: false }, // Required by Render
+    };
+  }
+
+  return {
+    host: process.env.DB_HOST || "localhost",
+    database: baseDb,
+    user: requireEnv("DB_USER"),
+    password: process.env.DB_PASS,
+    port: Number(process.env.DB_PORT) || 5432,
+  };
+}
+
+// 📦 Get target database name and user
 let dbName: string;
 let dbUser: string;
 
-if (connectionString) {
-  const parsed = parse(connectionString);
+if (process.env.DATABASE_URL) {
+  const parsed = parse(process.env.DATABASE_URL);
   if (!parsed.database || !parsed.user) {
-    throw new Error("❌ DATABASE_URL missing database or user.");
+    throw new Error("❌ DATABASE_URL is missing database or user.");
   }
   dbName = parsed.database;
   dbUser = parsed.user;
@@ -29,40 +71,21 @@ if (connectionString) {
   dbName = requireEnv("DB_NAME");
   dbUser = requireEnv("DB_USER");
 }
-const testDbName = process.env.TEST_DB_NAME; // optional
-if (result.error) {
-  console.error("❌ Failed to load .env file:", result.error);
-} else {
-  console.log("✅ .env file loaded successfully.");
-}
-console.log(`DB_NAME from .env: ${process.env.DB_NAME}`);
 
-if (!dbName) {
-  throw new Error("❌ DB_NAME is not defined in environment variables.");
-}
-if (!dbUser) {
-  throw new Error("❌ DB_USER is not defined in environment variables.");
-}
-
-const baseConnection = connectionString || {
-  host: process.env.DB_HOST,
-  database: "postgres",
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  port: Number(process.env.DB_PORT) || 5432,
-};
-
-const db = knex({
-  client: "pg",
-  connection: baseConnection,
-});
+const testDbName = process.env.TEST_DB_NAME || undefined;
 
 async function ensureDatabaseAndMigrate(targetDbName: string) {
   console.log(`🔍 Checking if database '${targetDbName}' exists...`);
 
-  const result = await db.raw(`SELECT 1 FROM pg_database WHERE datname = ?`, [
-    targetDbName,
-  ]);
+  const adminDb = knex({
+    client: "pg",
+    connection: getConnectionConfig("postgres"),
+  });
+
+  const result = await adminDb.raw(
+    `SELECT 1 FROM pg_database WHERE datname = ?`,
+    [targetDbName]
+  );
 
   if (!result.rows.length) {
     console.log(
@@ -82,19 +105,13 @@ async function ensureDatabaseAndMigrate(targetDbName: string) {
     console.log(`✅ Database '${targetDbName}' already exists.`);
   }
 
-  // Connect to the specific database
+  await adminDb.destroy();
+
   const dbConnection = knex({
     client: "pg",
-    connection: connectionString || {
-      host: process.env.DB_HOST,
-      database: targetDbName,
-      user: dbUser,
-      password: process.env.DB_PASS,
-      port: Number(process.env.DB_PORT) || 5432,
-    },
+    connection: getConnectionConfig(targetDbName),
   });
 
-  // Enable UUID extension
   try {
     await dbConnection.raw(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
     console.log(`✅ UUID extension enabled for '${targetDbName}'.`);
@@ -106,7 +123,6 @@ async function ensureDatabaseAndMigrate(targetDbName: string) {
     throw err;
   }
 
-  // Run migrations
   console.log(`🔄 Running migrations on '${targetDbName}'...`);
   try {
     await dbConnection.migrate.latest({
@@ -121,13 +137,12 @@ async function ensureDatabaseAndMigrate(targetDbName: string) {
     throw err;
   }
 
-  dbConnection.destroy();
+  await dbConnection.destroy();
 }
 
 async function setupDatabase() {
   try {
     await ensureDatabaseAndMigrate(dbName);
-
     if (testDbName) {
       await ensureDatabaseAndMigrate(testDbName);
     } else {
@@ -135,8 +150,7 @@ async function setupDatabase() {
     }
   } catch (err) {
     console.error("❌ Error during database setup:", (err as Error).message);
-  } finally {
-    db.destroy();
+    process.exit(1);
   }
 }
 
