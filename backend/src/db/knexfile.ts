@@ -8,7 +8,7 @@ const makeConnection = (prefix: string = "DB") => ({
   host: process.env[`${prefix}_HOST`] || "localhost",
   database: process.env[`${prefix}_NAME`] || "hr_application",
   user: process.env[`${prefix}_USER`] || "postgres",
-  password: process.env[`${prefix}_PASS`] || "",
+  password: process.env[`${prefix}_PASS`] || "password",
   port: Number(process.env[`${prefix}_PORT`] || 5432),
   timezone: "UTC",
 });

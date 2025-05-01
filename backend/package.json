@@ -7,7 +7,7 @@
     "dev": "nodemon src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles",
+    "test": "NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
     "migrate:latest": "npx ts-node src/db/knexfile.ts migrate:latest",
     "migrate:rollback": "npx ts-node src/db/knexfile.ts migrate:rollback",
     "migrate:make": "npx knex migrate:make --knexfile src/db/knexfile.ts",

@@ -1,189 +1,137 @@
-# Colab - Capstone Project by Jason Benjoya
+# Full-Stack HR Application - by Jason Benjoya
 
 ## Live demo: https://www.colab-music.com/
 
-## demo username: testuser; password: testpass
-
 ---
-
-<p align="center">
-<img src="static/Logo.png" />
-</p>
 
 ### PROJECT GOALS
 
-Colab is a full-stack web app that marks my second capstone project for the Springboard Software Engineering Career Track Bootcamp, utilitizing an ExpressJS backend with a ReactJS frontend. It includes the following technologies:
+The task was to create a simple full-stack web application for basic HR functions, specifically around payroll. This application is a simple and fully-featured MVP, with the ability to view, create, update, and delete employees. Employee metadata includes their name, salary, and various pay deductions, as well as the calculated net pay. The technologies used:
 
 - HTML5
 - CSS3
-- Javascript
+- Typescript
 - Bootstrap
-- AJAX/Axios
+- Axios
 - PostgreSQL
-- BCrypt
 - NodeJS
 - ExpressJS
 - ReactJS
-- Redux
-- React-Beautiful-DnD (drag-and-drop)
-
-**Note**: _This is a first version of a student project. Therefore, while there are many features that could be built out further, this app is merely a first step to show my understanding of the technologies at play._
 
 ---
 
 ### ABOUT THE APP
 
-Colab is, in the simplest terms, a collaborative songwriting suite. The process of cowriting songs was severely shaken during the pandemic, when either extreme in-person caution made it impossible to get any work done, or failing technologies did. Colab provides a one-stop-shop for users to begin the process of writing their next hit.
-
-Although it is not meant to substitute true collaborative songwriting, Colab a place for users to have a common suite in which they can have all of their notes and ideas organized and ready to build out into a fully-imagined production.
+This app is, in the simplest terms, a very basic payroll viewing and editing system. Given the open-ended nature of the project prompt, I made choices about the desired feature-set that allow for future expansion and improvement.
 
 ---
+
+### System Design Choices
+
+#### Database:
+
+I decided to use a lightweight PostgreSQL database for this project to store employee and deduction data. I wanted the ability to categorize deductions explicitly by type (tax, benefits, etc), which made for a great use-case for its own table. Each deduction has a foreign key to the given employee, as well as the amount and type. For any given employee, they can only have at most one deduction of each type.
+
+Considerations: Due to the simple nature of this app, having a NoSQL database could also work just as well, and would still have the ability to track deductions for employee by type. However, the structured nature of the SQL database made for a much simpler way to do database-level calculations for the total deductions and net pay, which made for a more efficient server. The tradeoff, of course, comes with the desire to add more possible types for the Deductions, which will require a database migration.
+
+#### Server
+
+I used a simple nodeJS/ExpressJS server for my backend. I utilized the KnexJS ORM to interface with my database, which includes all necessary operations to create the tables and functions there-in. The backend uses TypeScript for more explicit type safety. I split the logic between repositories, controllers, and routes, so that each layer would be responsible for an explicit task. The repositories do all of the database operations, controllers call those methods and return the express responses back to the routes, which utilize any middleware that may be needed.
+
+In the case of this app, the only middleware I added was a zod validation middleware for mutating operations, and a global error handler for cleaner and more explicit error handling.
+
+#### Front End
+
+The front end was created a single-page application using ReactJS with typescript, and was scaffolded for ease of creation using `create vite` tool. The front-end uses an api interface service with axios to centralize all api logic in one locaiton. Each operation is then called in a custom react hook that is meant to run only that operation (separation of concerns, encapsulation). I used a simple React router that could navigate to my three major routes for viewing all employees, viewing/editing a single employee, or creating an employee. There is also a catch-all not-found page for any mal-formed URLs. The whole app is styled using bootstrap utility classes. The front-end has clearly delineated pathways for all CRUD operations required for this app.
 
 ### FRONT END/USER FLOW
 
+NOTE: This app was created with the mobile-first mindset, so users can/should feel empowered to utilize either desktop or mobile (or anything in between) to access the application.
+
 #### <ins>Landing Page</ins>
 
-Full use of all Colab's features does require authentication, so upon arriving at the home page, an unauthenticated user is met with a landing page, which displays previews of what they can find inside the app.
+The main landing page is simply the employee list page. Any already-created employees will show on this page either in a table, or a card format (Depending on the form factor of the user's device). If no employees exist a simple message alerts the user to this situation. There is also a button on this page to create a new employee, which will navigate the user to the employee creation page.
 
-![Landing Page](static/landing_page.gif)
+The fields shown in the cards and table rows for each user include their name, their salary, the sum of all deductions they pay, and finally the calculation of their net pay. The table view is fully sortable.
+
+Users can also find an employee search bar at the top that allows them to filter the list by name. On desktop, the search is in real time (with a short debounce to comply with UX standards), and on mobile, due to the presence of virtual keyboards, the filtering logic waits for a submit button press. The search is case insensitive and will find any records with partial matches.
+
+Desktop
+![Landing Page](static/employees_list.png)
+
+Mobile
+![Landing Page Mobile](static/employees_list_mobile.png)
 
 At the bottom of the landing page, as well as in the navigation bar, there are links to login or signup, in order to gain access to all of Colab's features.
 
-#### <ins>Authentication</ins>
+#### <ins>Create User</ins>
 
-A user can log in by clicking on the `Login` button in the top right corner of the Navbar, which will navigate, using client-side routing with React-Router, to the /login route, displaying a login form.
+Clicking the "Add Employee" button will navigate to the `/employees/create` route, which displays a fully empty form for creating a new employee. The available fields are for name, salary, and deductions. The deductions fields are unique. A dropdown is present for selecting what type of deduction a user wants to create for the employee. Clicking "add deduction" will create a new deduction input group, which will show the type as well as the amount.
 
-A user can use their registered username/password combo to login and be taken to their dashboard.
+Mobile Creation with Dropdown
+![Mobile Creation with Dropdown](static/mobile_creation_dropdown.png)
 
-![Login Page](static/login.gif)
+Mobile Creation With Deductions
+![Mobile Creation with Deduction](static/mobile_creation_with_deduction.png)
 
-If there are any login errors, such as invalid username or password, a user will be alerted to that directly on the form and will be prompted to login again.
+The entire form has validation for each field as well as custom error messaging for any API errors.
 
-![invalid login](static/invalid_login.gif)
+Desktop Creation with Validation
+![Desktop Creation with Validaiton](static/desktop_creation_with_validation.png)
 
-Alternatively, if a user has not previously registered, they can do so by clicking on the `Sign up` button in the top right corner of the navbar, which will navigate to the /register route and display a registration form.
+#### <ins>View/Edit User Details</ins>
 
-![registration Page](static/registration.gif)
+Once a user is created, or if a table row/card is clicked from the main list page, the user is navigated to the employee details page, located at `/employees/:id`.
 
-A user can register by supplying all fields, each of which is required. The username AND email must be unique (i.e a user cannot have two usernames associated with the same email, nor can they have two emails for the same username). Successful registration redirects to the user dashboard.
+On this page, the user can see much more granular detail about the employee's data. Along with the total sum of deductions and the net pay, each deduction present for a given employee is shown with its amount, so the user can see how the total is broken down.
 
-![successful registration](static/successful_registration.gif)
+From this view, a user can click the edit button, which will bring up the same form as the create page, only with initial values prepopulating the fields. They can also return back to the main page by clicking the `Back` button at the top.
 
-Breaching either of those constraints will prevent successful registration and alert to the user to the problem, prompting them to try again.
+View Employee Details
+![View employee details](static/view_employee_details.png)
 
-![invalid registration](static/invalid_registration.gif)
+Edit Employee Details
+![registration Page](static/edit_employee_details.gif)
 
-##### `Password Encryption`
+#### Adding and Deleting Dedutions
 
-All user passwords are salted and encrypted using the BCrypt library before being stored in the database. This provides an added level of security for users, so that they can be assured that nobody else knows their password.
+For a given deduction on the create and edit pages, a `delete` button exists. The behavior of this button depends upon whether the deduction is newly added, or if it already existed for the employee. When adding a deduction, it is not saved to the database and linked with an employee until the `Update Employee`
+or `Create Employee` button is pressed, thus running the method to hit the respective API endpoint. Before that point, each deduction is a simple UX component, and pressing the delete key will simply clear it from the UI.
 
-##### `Persisting Login`
+If, however, the deduction was pre-populated in the form while editing an employee, pressing the delete button will trigger a modal alerting the user that the deduction will be deleted from the database, and that such an operation cannot be undone. Even upon cancelling from editing the form itself, a deleted deduction will remain deleted.
 
-Colab uses JWTs to authenticate requests to the backend. Once a user is logged in, they are issued a token. This token is stored in the user's local storage to persist the user between page reloads. Colab also utilizes Redux to store the current user in the app state. Upon login, the proper user corresponding to the JWT is stored in the Redux store, and only gets cleared on logout.
+![deduction deletion](static/deleting_deductions.gif)
 
-#### <ins>User Dashboard</ins>
+#### Cancelling an Edit or Creation
 
-Upon authentication, a user is brought to their dashboard. Here they can find a button to create a new project, their own user info, any collaboration requests they have, and a collection of their projects. Projects are separated based on whether the user is the owner (i.e the initial creator of the project).
+The form for creaeting and editing an employee keeps track of dirty (edited) fields. If a user attempts to cancel a form that has been edited, they will be alerted with a modal asking if they are sure. If a user attempts to cancel editing a form they have not changed, they will simply be navigated away.
 
-###### Requests
+The navigation destination is dependent on the operation (create vs edit). If the user was attempting ot create a new employee, they will be navigated back to the main `/` route to the full employee list. If editing, they will be navigated to the `/employees/:id` route to view the employee details.
 
-If a user has a request to collaborate, it will appear in their "Cowrite Requests" panel. Each request displays the sender, as well as the project title and the timestamp at which the request was sent. A user can either reject the request, which simply marks it as answered and, upon page reload, removes it from their requests panel, or accept the request, which will add the project to their "Cowrites" list and give the user access to that project's resources.
+Note that in either case, successfully saving the form will navigate the user to the `/employees/:id` route to see the full employee details.
 
-![reject request](static/reject_request.gif)
-_Reject_
+#### Deleting an Employee
 
-![accept request](static/accept_request.gif)
-_Accept_
+If a user wishes to delete an employee, they can do so from the main list page. Whether on mobile or desktop, each employee record displays a delete button. Upon pressing, a user is alerted that this is a permanent action and is given the chance to cancel. If they do proceed, the employee record is immediately removed from the UI and can no longer be accessed.
 
-#### <ins>Projects<ins>
+Mobile
+![deleting an employee mobile](static/mobile_employee_delete.gif)
 
-##### Creating a New Project
-
-To begin a new project, an authenticated user can click the `Create New Project` button. Upon doing so, a new project will be created with the user listed as the owner, and the user will be navigated to the main project page for that newly created project.
-
-![new project](static/new_project.gif)
-
-A new project is created with a default title of "Click to Change Title", and the notes are defaulted to be blank. At the bottom of the project page, there is a row of buttons to save the project, leave the project, and delete it from the database (if the user is the project owner).
-
-##### Changing the title
-
-To change the title, a user simply has to click on the current title to trigger the editor. Once in edit mode, a new title can be added in (note that there is a maximum of 25 characters for a project title). A tooltip will also display on hover alerting the user of this click-to-edit functionality.
-
-![change title](static/change_title.gif)
-
-**Note**: _Submitting the new title does not change the title in the database. To persist the title change, users must click the `Save Project` button at the bottom of the page_
-
-##### Rhymes and Quotes
-
-There are two auxiliary tools found near the top of the project page: the Rhyme tool and the Inspirational Quote tool. Each can be activated by clicking on its corresponding button. The Rhyme Time button utilizes the Datamuse API to search RhymeZone for rhymes that match a given input word. The resulting list shows the words in order of decreasing accuracy according to RhymeZone's scoring algorithm (the RhymeZone score is also included for each result).
-
-![rhyme tool](static/rhyme.gif)
-
-Users can utlize the `Random Quote Inspo` tool to generate a random inspirational quote in order to help beat writer's block. The tool utilizes the ZenQuotes API to generate a new random quote each time the user clicks the button.
-
-![quote tool](static/quote.gif)
-
-##### Collaboration
-
-Users who are contributors on a given project, whether they are the owner or not, can invite other users to collaborate, as well. By clicking on the `Collaborate` button, a user can search by username for other active users to invite. If the desired user is already a collaborator, or if a request has already been sent to them, they will not be able to request that user again. Instead, the `Request` button will be replaced with a disabled button indicating the status of that user with regards to the current project.
-
-![collaborate tool](static/collaborate.gif)
-
-##### Arrangement Lab
-
-The Arrangement Lab tool is where users can brainstorm about how they want their song to flow from section to section. Consisting of drag-and-drop song section tiles, a user can insert and reorder song sections to create their preferred song arrangement for a given project. As they progress through the songwriting process, they can update this arrangement to correspond with any changes they make along the way. These adjustments can including adding, rearranging, and removing sections from the master project arrangement.
-
-![Arrangement Tool](static/arrangement.gif)
-
-**Note**: _The save button is disabled if there are no items in the Arrangement column. This way a user cannot save an empty arrangement to the database, causing API errors. Changes to the Arrangement column will only persist if the save button is pressed. Otherwise, no changes will persist._
-
-##### Saving/Leaving/Deleting Projects
-
-From the main project page, a user can save all changes made to the project by clicking the `Save Project` button. Without doing so, no changes made to the title or the notes will be stored. Upon saving, a user is alerted to a successful save.
-
-![Save project](static/save.gif)
-
-All users are presented with a `Leave` button to leave from a project, and owners are also presented with a `Delete` button, so that they can formally scrap a project from the database. If an owner chooses to leave a project, this action will also delete the project and any contributors will lose access to it. In this sense, owners of a project have pseudo-admin privileges over their original projects.
-
-![Owner Leaves Project](static/owner_leave.gif)
-_Owner leaves project_
-
-![Contributor Leaves Project](static/cowrite_leave.gif)
-_Contributor leaves project_
-
-![Owner deletes Project](static/owner_delete.gif)
-_Owner deletes project_
-
-#### <ins>Profile<ins>
-
-A user can edit basic details of their profile including their email address and their first and last name. Doing so changes the user's display details on projects and collaboration requests. Editing a profile will also adjust the current user in the Redux store and therefore take immediate effect throughout the app anywhere the current user details are being utilized.
-
-![Profile Update](static/profile.gif)
-
----
-
-### Back end/API
-
-While many features on the front-end utilize third-party APIs, such as the rhyme tool (which utilizes the Datamuse API) and the random quote generator (which utilizes the ZenQuotes API), the back-end functionality was also built from scratch for the sole purpose of controlling Colab's data.
-
-The backend is built using an ExpressJS framework, and utilizes the node-pg library to connect with the PostgreSQL database. The backend is comprised of a CRUD API to store, update, and manage all of the data pertaining to Colab's users, projects, requests, arrangements, and cowrites, and uses RESTful routing conventions.
-
-The direct database manipulation logic is separated from the RESTful routing used to connect the front end with the back end. Each data table also has its own separate file for database manipulation, unit tests, RESTful routing, and integration testing.
+Desktop
+![deleting an employee desktop](static/desktop_employee_delete.gif)
 
 #### Running Backend Tests
 
-All unit tests were created using the Jest testing library, with the integration tests utilizing the Supertest library as well. The testing suite currently contains 191 tests in total, which provides roughly 93% coverage over all back-end operations.
-
-To run the testing suite, downlaod the backend code and run `npm install` to install all packages and dependencies from the `package.json` file. Once installed, from the root directory of the backend, run `jest -i` with the optional `--coverage` option to run all tests in order and optionally check the testing coverage. Alternatively, to test one database model or set of routes, navigate to either the `/models` or `/routes` directory, respectively, and run `jest -i __FILENAME__`.
+All unit tests were created using the Jest testing library, with the integration tests utilizing the Supertest library as well. The testing suite currently contains 39 tests in total, which provides roughly 92% coverage over all back-end operations.
 
 ---
 
 ### Running the App
 
-To run the app locally on your machine, clone this repository or download the code directly to your machine. From each folder, backend and colab-frontend, run `npm install` to install all necessary packages and dependencies.
+To run the app locally on your machine, clone this repository or download the code directly to your machine. From each folder, backend and frontend, run `npm install` to install all necessary packages and dependencies.
 
 MAKE SURE YOU HAVE POSTGRESQL INSTALLED ON YOUR MACHINE BEFORE YOU CONTINUE.
 
-From the backend folder, first seed the database by running `psql < colab.sql`and follow the prompts. Next, run `npm run dev` to start up the development server on `localhost:3001`. From the colab-frontend folder, run 'npm start' to start up the development server on the front end.
+From the backend folder, first set up the database by running `npm run db:setup`. Next, run `npm run dev` to start up the development server on `localhost:3001`. From the colab-frontend folder, run 'npm start' to start up the development server on the front end.
 
-**Note** _The ZenQuotes API, which is utilized for the random quote generator, requires an API key to gain full access. If you would like to include this feature, you will need to buy a key from ZenQuotes and place it into a `.env` file to gain access to the full ZenQuotes API feature set_
+**Note** It is highly recommended to copy over the values in `.env.example` to your own `.env`. You can change the values as desired. The app will still run using default fallback values for each env variable. 

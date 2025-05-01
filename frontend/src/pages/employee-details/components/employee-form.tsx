@@ -132,7 +132,7 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                         {values.deductions.map((deduction, index) => (
                           <div
                             key={deduction.id ?? index}
-                            className="d-inline-flex align-items-center mb-2 gap-2 border border-info rounded p-3"
+                            className="position-relative d-inline-flex align-items-center mb-2 gap-2 border border-info rounded p-3"
                           >
                             <div className="d-flex flex-column gap-2 flex-xl-row">
                               <div>
@@ -181,9 +181,14 @@ const EmployeeForm: React.FC<Props> = ({ initialValues, mode, onSuccess }) => {
                                 className="btn btn-outline-danger h-50"
                                 style={{ aspectRatio: "1 / 1" }}
                                 onClick={async () => {
-                                  remove(index);
                                   if (deduction.id) {
-                                    await deleteEmployeeDeduction(deduction.id);
+                                    setSelectedDeduction(
+                                      deduction as Deduction
+                                    );
+                                    setPendingDeductionDeleteIndex(index);
+                                    setShowDeductionDeleteModal(true);
+                                  } else {
+                                    remove(index);
                                   }
                                 }}
                               >
