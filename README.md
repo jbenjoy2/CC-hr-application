@@ -134,4 +134,32 @@ MAKE SURE YOU HAVE POSTGRESQL INSTALLED ON YOUR MACHINE BEFORE YOU CONTINUE.
 
 From the backend folder, first set up the database by running `npm run db:setup`. Next, run `npm run dev` to start up the development server on `localhost:3001`. From the colab-frontend folder, run 'npm start' to start up the development server on the front end.
 
-**Note** It is highly recommended to copy over the values in `.env.example` to your own `.env`. You can change the values as desired. The app will still run using default fallback values for each env variable. 
+**Note** It is highly recommended to copy over the values in `.env.example` to your own `.env`. You can change the values as desired. The app will still run using default fallback values for each env variable.
+
+## Future Considerations
+
+### Authentication and Authorization
+
+Right now, the app has no safeguards around employee data manipulation. Any user with the app URL can easily edit employee data. This is obviously not desired. The next version of this app should and would have a dedicated authentication system built into the API, comprised of a new `users` table to store admin users to the system. A V3 of the app could even include non-admin users who can only view their own details, but not make any edits or view any other employees' details.
+
+The frontend would have a log-in feature for users to sign in. All pages of the front end would be protected behind the sign-in route. Signed-in users would be tracked via global app state (context) or cookies (session tokens).
+
+Note: In V2, where only admins have accounts, there would be no `Registration` logic, as an existing admin should have to manually allow another non-existing admin user access to the portal. V3 would add in the ability for non-admin users to register to view their own data. Employee records would have a foreign-key relationship to users in that scenario.
+
+### Features
+
+#### Time-based calculations
+
+Deductions and salary payments tend to be processed at regular intervals, be it monthly, bi-weekly, or otherwise. This can differ from employee-to-employee. A future feature expansion would allow a new field on each employee to mark how often they are paid. That value can be changed when editing a user, and all calculations around salary, net pay, and total deductions would likewise be displayed to corroborate that time interval. Time-based calculations may also only be desired on certain fields (deductions, not salary for example). This would allow for flexibility in how an employee can view/understand their full pay, along with the incremental nature of it.
+
+#### Even more granularity in Deductions
+
+There are far more deduction use-cases. Future versions of the app would include all of those, and may even remove the "other" category as it is not very informative.
+
+#### Sorting Employees List On Mobilie
+
+The desktop view of the employees list is fully sortable by nature of the `react-table` component. A potential quick-win improvement would be to add manual sorting to the page such that sorting is possible and mobile, and such that it persists when changing views. Depending on the device, it may be possible that simple rotating the screen changes from mobile to desktop view, and thus persisting the sorting/filtering between views would be a much cleaner UX.
+
+### Scalability
+
+The simple nature of this app lends itself well to scale up as the company grows. The employee data and deductions data is all relatively simple, and therefore can scale without issue. As more features are added and more users are accessising it, there may be a desire to spin up multiple dyno instances of the server and buffer traffic with a load balancer, just to maintain efficient data flow.
