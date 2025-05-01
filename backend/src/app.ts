@@ -1,5 +1,6 @@
 import express from "express";
 import employeesRouter from "./routes/employees";
+import employeeDeductionsRouter from "./routes/employee-deductions";
 import { errorHandler } from "./middleware/errorHandler";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -17,6 +18,7 @@ app.use(
 app.use(express.json());
 // Mount employees router
 apiRouter.use("/employees", employeesRouter);
+apiRouter.use("/employee-deductions", employeeDeductionsRouter);
 
 app.use("/api", apiRouter);
 

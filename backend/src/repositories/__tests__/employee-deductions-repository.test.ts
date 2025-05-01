@@ -141,4 +141,33 @@ describe("EmployeeDeduction Repository", () => {
     expect(employeeDeductions).toHaveLength(1);
     expect(employeeDeductions).toMatchObject(updatedDeduction);
   });
+
+  it("should be able to delete a deduction by id", async () => {
+    const [createdEmployee] = await db("employees")
+      .insert({
+        name: "Another User",
+        salary: 60000,
+      })
+      .returning(["id"]);
+
+    //  add in deductions for that employee
+    const createdDeduction = await db("employee_deductions")
+      .insert({
+        deduction_type: DeductionTypes.TAX,
+        deduction_amount: 100,
+        employee_id: createdEmployee.id,
+      })
+      .returning(["id"]);
+
+    const deleted = await employeeDeductionRepo.deleteDeductionById(
+      createdDeduction[0].id
+    );
+    expect(deleted).toBe(true);
+
+    // try to find the employee deduction
+    const found = await db("employee_deductions")
+      .where({ id: createdDeduction[0].id })
+      .first();
+    expect(found).toBeUndefined();
+  });
 });
