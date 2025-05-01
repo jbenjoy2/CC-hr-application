@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
+    "@types/react-helmet": "^6.1.11",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.5",
     "formik": "^2.4.6",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
+    "react-helmet": "^6.1.0",
     "react-router-dom": "^7.5.3",
     "yup": "^1.6.1"
   },
