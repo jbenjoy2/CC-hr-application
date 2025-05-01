@@ -1,13 +1,11 @@
 import knex, { Knex } from "knex";
 import { execSync } from "child_process";
 import dotenv from "dotenv";
-import fs from "fs";
 import { parse } from "pg-connection-string";
-import path from "path";
 import config from "./knexfile";
-import { PoolClient } from "pg";
 
-// ✅ Load .env only in development and show status
+// ✅ Load .env only in local development
+console.log({ env: process.env.NODE_ENV });
 if (process.env.NODE_ENV !== "production") {
   const result = dotenv.config();
   if (result.error) {
@@ -17,7 +15,7 @@ if (process.env.NODE_ENV !== "production") {
   }
 }
 
-// 🔧 Helper to require specific environment vars (for local fallback)
+// 🔧 Fallback helper for required local env vars
 function requireEnv(varName: string): string {
   const value = process.env[varName];
   if (!value) {
@@ -28,50 +26,47 @@ function requireEnv(varName: string): string {
   return value;
 }
 
-// 🔧 Build connection config using DATABASE_URL or individual env vars
+// 🔧 Parse connection from DATABASE_URL or local env vars
 function getConnectionConfig(
-  baseDb: string = "postgres"
+  databaseOverride?: string
 ): Knex.PgConnectionConfig {
   if (process.env.DATABASE_URL) {
     const parsed = parse(process.env.DATABASE_URL);
-    if (!parsed.host || !parsed.user) {
-      throw new Error("❌ Invalid DATABASE_URL: missing host, user");
+
+    const { host, user, password, port, database } = parsed;
+
+    if (!host || !user || !database) {
+      throw new Error(
+        "❌ DATABASE_URL is missing required fields (host, user, or database)."
+      );
     }
+
     return {
-      host: parsed.host,
-      user: parsed.user,
-      password: parsed.password,
-      port: parsed.port ? parseInt(parsed.port) : 5432,
-      database: baseDb,
-      ssl: { rejectUnauthorized: false }, // Required by Render
+      host,
+      user,
+      password,
+      database: databaseOverride ?? database,
+      port: port ? parseInt(port) : 5432,
+      ssl: { rejectUnauthorized: false }, // 🔐 Required on Render
     };
   }
 
   return {
     host: process.env.DB_HOST || "localhost",
-    database: baseDb,
     user: requireEnv("DB_USER"),
     password: process.env.DB_PASS,
+    database: databaseOverride ?? requireEnv("DB_NAME"),
     port: Number(process.env.DB_PORT) || 5432,
   };
 }
 
-// 📦 Get target database name and user
-let dbName: string;
-let dbUser: string;
-
-if (process.env.DATABASE_URL) {
-  const parsed = parse(process.env.DATABASE_URL);
-  if (!parsed.database || !parsed.user) {
-    throw new Error("❌ DATABASE_URL is missing database or user.");
-  }
-  dbName = parsed.database;
-  dbUser = parsed.user;
-} else {
-  dbName = requireEnv("DB_NAME");
-  dbUser = requireEnv("DB_USER");
-}
-
+// 🔧 Get DB name + user (used in createdb command)
+const dbName = process.env.DATABASE_URL
+  ? parse(process.env.DATABASE_URL).database!
+  : requireEnv("DB_NAME");
+const dbUser = process.env.DATABASE_URL
+  ? parse(process.env.DATABASE_URL).user!
+  : requireEnv("DB_USER");
 const testDbName = process.env.TEST_DB_NAME || undefined;
 
 async function ensureDatabaseAndMigrate(targetDbName: string) {
