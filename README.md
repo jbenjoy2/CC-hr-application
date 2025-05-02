@@ -130,7 +130,7 @@ MAKE SURE YOU HAVE POSTGRESQL INSTALLED ON YOUR MACHINE BEFORE YOU CONTINUE.
 
 From the backend folder, first set up the database by running `npm run db:setup`. Next, run `npm run dev` to start up the development server on `localhost:3001`. From the colab-frontend folder, run 'npm start' to start up the development server on the front end.
 
-**Note** It is highly recommended to copy over the values in `.env.example` to your own `.env`. You can change the values as desired. The app will still run using default fallback values for each env variable.
+**Note** It is highly recommended to copy over the values in `.env.example` and `.env.test.example` to your own `.env` and `.env.test` files, respectively. You can change the values as desired. The app will still run using default fallback values for each env variable, but you will need to set up the test db properly for tests to run locally.
 
 ## Future Considerations
 
@@ -154,10 +154,10 @@ There are far more deduction use-cases. Future versions of the app would include
 
 #### Sorting Employees List On Mobilie
 
-The desktop view of the employees list is fully sortable by nature of the `react-table` component. A potential quick-win improvement would be to add manual sorting to the page such that sorting is possible and mobile, and such that it persists when changing views. Depending on the device, it may be possible that simple rotating the screen changes from mobile to desktop view, and thus persisting the sorting/filtering between views would be a much cleaner UX.
+The desktop view of the employees list is fully sortable by nature of the `react-table` component. A potential quick-win improvement would be to add manual sorting to the page such that sorting is possible on mobile, and such that it persists when changing views. Depending on the device, it may be possible that simply rotating the screen changes from mobile to desktop view. Persisting the sorting between views would make for a much cleaner UX.
 
 ### Scalability
 
 The simple nature of this app lends itself well to scale up as the company grows. The employee data and deductions data is all relatively simple, and therefore can scale without issue. As more features are added and more users are accessising it, there may be a desire to spin up multiple dyno instances of the server and buffer traffic with a load balancer, just to maintain efficient data flow.
 
-One biproduct of scaling to consider,though, is page-load times for the main page as more and more employees have to be fetched. A caching layer on the front end could be useful to prevent unnecessary API fetching of employees already in the cache.
+One biproduct of scaling to consider,though, is page-load times for the main page as more and more employees have to be fetched. A caching layer on the front end could be useful to prevent unnecessary API fetching of employees already in the cache, and a cleaner/more-selective refetching tool for determining when to update the data in the cache.
