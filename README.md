@@ -42,7 +42,7 @@ In the case of this app, the only middleware I added was a zod validation middle
 
 #### Front End
 
-The front end was created a single-page application using ReactJS with typescript, and was scaffolded for ease of creation using `create vite` tool. The front-end uses an api interface service with axios to centralize all api logic in one locaiton. Each operation is then called in a custom react hook that is meant to run only that operation (separation of concerns, encapsulation). I used a simple React router that could navigate to my three major routes for viewing all employees, viewing/editing a single employee, or creating an employee. There is also a catch-all not-found page for any mal-formed URLs. The whole app is styled using bootstrap utility classes. The front-end has clearly delineated pathways for all CRUD operations required for this app.
+The front end is a single-page application using ReactJS with typescript, and was scaffolded for ease of creation using the `create vite` tool. The front-end uses an api interface service with axios to centralize all api logic in one locaiton. Each operation is then called in a custom react hook that is meant to run only that operation (separation of concerns, encapsulation). I used a simple React router that could navigate to my three major routes for viewing all employees, viewing/editing a single employee, or creating an employee. There is also a catch-all not-found page for any mal-formed URLs. The whole app is styled using bootstrap utility classes. The front-end has clearly delineated pathways for all CRUD operations required for this app.
 
 ### FRONT END/USER FLOW
 
@@ -62,11 +62,7 @@ Desktop
 Mobile
 ![Landing Page Mobile](static/employees_list_mobile.png)
 
-At the bottom of the landing page, as well as in the navigation bar, there are links to login or signup, in order to gain access to all of Colab's features.
-
-#### <ins>Create User</ins>
-
-Clicking the "Add Employee" button will navigate to the `/employees/create` route, which displays a fully empty form for creating a new employee. The available fields are for name, salary, and deductions. The deductions fields are unique. A dropdown is present for selecting what type of deduction a user wants to create for the employee. Clicking "add deduction" will create a new deduction input group, which will show the type as well as the amount.
+Clicking the "Add Employee" button will navigate to the `/employees/create` route, which displays a fully empty form for creating a new employee. The available fields are for name, salary, and deductions. The deductions fields are unique. A dropdown is present for selecting what type of deduction a user wants to create for the employee. Clicking "add deduction" will create a new deduction input group, which will show the type as well as the amount. Only un-used deduction types for that specific employee will show in the dropdown, and if all are in use, the dropdown is hidden.
 
 Mobile Creation with Dropdown
 ![Mobile Creation with Dropdown](static/mobile_creation_dropdown.png)
@@ -79,21 +75,21 @@ The entire form has validation for each field as well as custom error messaging 
 Desktop Creation with Validation
 ![Desktop Creation with Validaiton](static/desktop_creation_with_validation.png)
 
-#### <ins>View/Edit User Details</ins>
+#### <ins>View/Edit Employee Details</ins>
 
 Once a user is created, or if a table row/card is clicked from the main list page, the user is navigated to the employee details page, located at `/employees/:id`.
 
 On this page, the user can see much more granular detail about the employee's data. Along with the total sum of deductions and the net pay, each deduction present for a given employee is shown with its amount, so the user can see how the total is broken down.
 
-From this view, a user can click the edit button, which will bring up the same form as the create page, only with initial values prepopulating the fields. They can also return back to the main page by clicking the `Back` button at the top.
+From this view, a user can click the edit button, which will bring up the same form as the create page, only with initial values prepopulating the fields. They can also return back to the main page by clicking the `Back` button at the top as long as they are not actively editing the form.
 
 View Employee Details
 ![View employee details](static/view_employee_details.png)
 
 Edit Employee Details
-![registration Page](static/edit_employee_details.gif)
+![edit employee details](static/edit_employee_details.gif)
 
-#### Adding and Deleting Dedutions
+#### Adding and Deleting Deductions
 
 For a given deduction on the create and edit pages, a `delete` button exists. The behavior of this button depends upon whether the deduction is newly added, or if it already existed for the employee. When adding a deduction, it is not saved to the database and linked with an employee until the `Update Employee`
 or `Create Employee` button is pressed, thus running the method to hit the respective API endpoint. Before that point, each deduction is a simple UX component, and pressing the delete key will simply clear it from the UI.
@@ -106,7 +102,7 @@ If, however, the deduction was pre-populated in the form while editing an employ
 
 The form for creaeting and editing an employee keeps track of dirty (edited) fields. If a user attempts to cancel a form that has been edited, they will be alerted with a modal asking if they are sure. If a user attempts to cancel editing a form they have not changed, they will simply be navigated away.
 
-The navigation destination is dependent on the operation (create vs edit). If the user was attempting ot create a new employee, they will be navigated back to the main `/` route to the full employee list. If editing, they will be navigated to the `/employees/:id` route to view the employee details.
+The navigation destination is dependent on the operation (create vs edit). If the user was attempting to create a new employee, they will be navigated back to the main `/` route with the full employee list. If editing, the `isEditing` state is reverted to `false`, returning to the `View Details` component state.
 
 Note that in either case, successfully saving the form will navigate the user to the `/employees/:id` route to see the full employee details.
 
@@ -122,7 +118,7 @@ Desktop
 
 #### Running Backend Tests
 
-All unit tests were created using the Jest testing library, with the integration tests utilizing the Supertest library as well. The testing suite currently contains 39 tests in total, which provides roughly 92% coverage over all back-end operations.
+All unit tests were created using the Jest testing library, with the integration tests utilizing the Supertest library, as well. The testing suite currently contains 39 tests in total, which provides roughly 92% coverage over all back-end operations.
 
 ---
 

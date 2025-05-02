@@ -2,7 +2,7 @@
 **/node_modules
 
 # Ignore all .env files everywhere
-**/.env
+**/.env*
 
 **/package-lock.json
 
